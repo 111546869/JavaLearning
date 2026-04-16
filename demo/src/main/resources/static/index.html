@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>后端开发辅导Agent</title>
+  <!-- Element Plus CSS (按需保留其他功能) -->
+  <link rel="stylesheet" href="https://unpkg.com/element-plus/dist/index.css" />
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <div id="app" class="gpt-app">
+    
+    <!-- 左侧会话侧边栏 -->
+    <div class="gpt-sidebar">
+      <button class="new-chat-btn" @click="newConversation">
+        + 新会话
+      </button>
+      <div class="session-list">
+        <div 
+          v-for="s in sessions" 
+          :key="s.id"
+          class="session-item"
+          :class="{ active: s.id === activeConvId }"
+          @click="selectConversation(s.id)"
+        >
+          <div class="session-title">{{ s.title || '新会话' }}</div>
+          <div class="session-time">{{ s.when }}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 右侧主对话区 -->
+    <div class="gpt-main">
+      <!-- 顶栏 (添加打开右侧代码面板的开关) -->
+      <div class="chat-header">
+        <span style="font-weight: 600;">后台开发面试与编程助手</span>
+        <button @click="showCodingPanel = !showCodingPanel" class="toggle-code-btn">
+          {{ showCodingPanel ? '关闭做题' : '打开做题面板' }}
+        </button>
+      </div>
+      <!-- 聊天记录滚动区 -->
+      <div class="chat-viewport" ref="messagesEl">
+        <div class="chat-scroll-area">
+          <div 
+            v-for="(msg, index) in messages" 
+            :key="index"
+            class="msg-row"
+            :class="msg.role"
+          >
+            <div class="msg-inner">
+              <div class="msg-avatar">
+                {{ msg.role === 'user' ? '你' : 'A' }}
+              </div>
+              <!-- assistant 直接解析 markdown，user 直出文本 -->
+              <div 
+                v-if="msg.role === 'assistant'" 
+                class="msg-content markdown-body" 
+                v-html="formatMessage(msg.content)"
+              ></div>
+              <div 
+                v-else 
+                class="msg-content"
+              >{{ msg.content }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 底部居中输入控制区 -->
+      <div class="input-panel">
+        <div class="input-box">
+          <textarea 
+            v-model="draft"
+            placeholder="发送消息..."
+            @keydown.enter.prevent="onSend"
+            :disabled="loading"
+          ></textarea>
+          <button class="send-btn" @click="onSend" :disabled="!draft.trim() || loading">
+             ⬆ 
+          </button>
+        </div>
+        <!-- 新增：右侧做题与测评面板 (分上下两部分：题目与编辑器) -->
+        <div class="coding-panel" v-if="showCodingPanel">
+          <!-- 题目描述区 -->
+          <div class="problem-desc markdown-body" v-html="formatMessage(problemText)"></div>
+          
+          <!-- 代码编写器与结果区 -->
+          <div class="editor-area">
+            <div class="editor-header">
+              <span>代码编辑器 (JavaScript)</span>
+              <button class="run-btn" @click="submitCode" :disabled="evaluating">
+                {{ evaluating ? '运行中...' : '提交测评' }}
+              </button>
+            </div>
+            <textarea class="code-input" v-model="userCode" spellcheck="false"></textarea>
+            
+            <!-- 运行结果控制台 -->
+            <div class="console-output" v-if="evalResult">
+              <strong>执行结果：</strong>
+              <pre>{{ evalResult }}</pre>
+            </div>
+          </div>
+        </div>
+        <div class="input-footer">
+          内容由 AI 生成，仅供参考。
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- 依赖 -->
+  <script src="https://unpkg.com/vue@3"></script>
+  <script src="https://unpkg.com/element-plus"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="/app.js"></script>
+</body>
+</html>

@@ -1,5 +1,13 @@
 package com.example.demo;
 
 public class ChatRequest {
-    public String message;
+    private String message;
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
 }

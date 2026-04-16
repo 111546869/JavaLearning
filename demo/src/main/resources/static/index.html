@@ -35,9 +35,6 @@
       <!-- 顶栏 (添加打开右侧代码面板的开关) -->
       <div class="chat-header">
         <span style="font-weight: 600;">后台开发面试与编程助手</span>
-        <button @click="showCodingPanel = !showCodingPanel" class="toggle-code-btn">
-          {{ showCodingPanel ? '关闭做题' : '打开做题面板' }}
-        </button>
       </div>
       <!-- 聊天记录滚动区 -->
       <div class="chat-viewport" ref="messagesEl">
@@ -79,28 +76,6 @@
           <button class="send-btn" @click="onSend" :disabled="!draft.trim() || loading">
              ⬆ 
           </button>
-        </div>
-        <!-- 新增：右侧做题与测评面板 (分上下两部分：题目与编辑器) -->
-        <div class="coding-panel" v-if="showCodingPanel">
-          <!-- 题目描述区 -->
-          <div class="problem-desc markdown-body" v-html="formatMessage(problemText)"></div>
-          
-          <!-- 代码编写器与结果区 -->
-          <div class="editor-area">
-            <div class="editor-header">
-              <span>代码编辑器 (JavaScript)</span>
-              <button class="run-btn" @click="submitCode" :disabled="evaluating">
-                {{ evaluating ? '运行中...' : '提交测评' }}
-              </button>
-            </div>
-            <textarea class="code-input" v-model="userCode" spellcheck="false"></textarea>
-            
-            <!-- 运行结果控制台 -->
-            <div class="console-output" v-if="evalResult">
-              <strong>执行结果：</strong>
-              <pre>{{ evalResult }}</pre>
-            </div>
-          </div>
         </div>
         <div class="input-footer">
           内容由 AI 生成，仅供参考。

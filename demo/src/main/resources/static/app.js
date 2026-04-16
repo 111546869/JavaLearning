@@ -9,43 +9,7 @@ createApp({
     const loading = ref(false);
     const newTitle = ref('');
     const messagesEl = ref(null);
-    // ======== 新增：代码面板相关的状态 ========
-    const showCodingPanel = ref(false);
-    const problemText = ref('### 题目：两数之和\n给定一个整数数组 `nums` 和一个整数目标值 `target`，请你在该数组中找出和为目标值的那两个整数，并返回它们的数组下标。\n\n**示例：**\n输入：nums = [2,7,11,15], target = 9\n输出：[0,1]');
-    const userCode = ref('function twoSum(nums, target) {\n    // 在此编写你的代码\n    \n}');
-    const evaluating = ref(false);
-    const evalResult = ref('');
 
-    // ======== 模拟代码提交评测 ========
-    async function submitCode() {
-      evaluating.value = true;
-      evalResult.value = '提交中...';
-      try {
-        const res = await fetch('/api/v1/evaluate', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ code: userCode.value })
-        });
-        const taskId = await res.text(); 
-        
-        // 建立 MQ / SSE 监听结果
-        evalResult.value = '代码提交成功，后台评测执行中... (任务ID: ' + taskId + ')';
-        const source = new EventSource(`/api/v1/evaluate/stream?taskId=${taskId}`);
-        source.onmessage = function(event) {
-          evalResult.value = event.data;
-          source.close();
-          evaluating.value = false;
-        };
-        source.onerror = function(e) {
-          evalResult.value = '评测监听断开，请检查。';
-          source.close();
-          evaluating.value = false;
-        };
-      } catch(e) {
-        evalResult.value = "运行报错：" + e.message;
-        evaluating.value = false;
-      }
-    }
     function loadSessions(){
       const all = JSON.parse(localStorage.getItem('agent_sessions')||'[]');
       sessions.value = all;
@@ -225,8 +189,7 @@ createApp({
       return conv?.title || '新会话';
     });
 
-    return { sessions, activeConvId, messages, draft, loading, newTitle, newConversation, selectConversation, onSend, onKeydown, messagesEl, clearCurrent, formatMessage, currentSessionTitle,
-      showCodingPanel, problemText, userCode, evaluating, evalResult, submitCode
+    return { sessions, activeConvId, messages, draft, loading, newTitle, newConversation, selectConversation, onSend, onKeydown, messagesEl, clearCurrent, formatMessage, currentSessionTitle
      };
   }
 }).use(ElementPlus).mount('#app');
